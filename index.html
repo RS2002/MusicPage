@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Longino • Independent Musician</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        body { font-family: system-ui, sans-serif; }
+        .song-card { transition: all 0.3s; }
+        .song-card:hover { transform: translateX(8px); background-color: #1f2937; }
+        .lyrics { max-height: 320px; overflow-y: auto; line-height: 1.6; font-family: 'Courier New', monospace; }
+        .nav-active { border-b-4 border-violet-500 font-bold; }
+        .clickable-cover { cursor: pointer; transition: transform 0.2s; }
+        .clickable-cover:hover { transform: scale(1.04); }
+    </style>
+</head>
+<body class="bg-zinc-950 text-zinc-100">
+    <div class="min-h-screen flex">
+        <!-- Sidebar -->
+        <div class="w-72 bg-zinc-900 border-r border-zinc-700 p-6 flex flex-col">
+            <div class="flex items-center gap-3 mb-8">
+                <img src="https://raw.githubusercontent.com/RS2002/MusicPage/main/data/cover.jpg" class="w-14 h-14 rounded-2xl shadow" alt="RS2002">
+                <div>
+                    <h1 class="text-3xl font-bold tracking-tight">Longino</h1>
+                    <p class="text-zinc-400 text-sm">Independent Musician</p>
+                </div>
+            </div>
+            <nav class="space-y-1">
+                <button onclick="showPage('home')" class="nav-active w-full text-left px-4 py-3 rounded-xl flex items-center gap-3" id="nav-home">
+                    <i class="fas fa-house"></i> Home / Bio
+                </button>
+                <button onclick="showPage('projects')" class="w-full text-left px-4 py-3 rounded-xl flex items-center gap-3 hover:bg-zinc-800" id="nav-projects">
+                    <i class="fas fa-folder-tree"></i> All Projects (3)
+                </button>
+            </nav>
+            <div class="mt-auto text-xs text-zinc-500">
+                ✅ All source files are hosted on GitHub.<br>
+                🎵 Loading may take a moment due to the Great Firewall in China.
+            </div>
+        </div>
+
+        <!-- Main -->
+        <div class="flex-1">
+            <header class="border-b border-zinc-700 bg-zinc-900 px-8 py-4 flex justify-between items-center">
+                <div class="flex gap-6 text-sm font-medium">
+                    <button onclick="showPage('home')" class="hover:text-white">🏠 Bio</button>
+                    <button onclick="showProject('NEWS')" class="hover:text-white">📰 NEWS</button>
+                    <button onclick="showProject('Personal Project')" class="hover:text-white">🎸 Personal Project</button>
+                    <button onclick="showProject('Tokamak Disruption')" class="hover:text-white">🤖 Tokamak Disruption</button>
+                </div>
+                <button onclick="window.open('https://github.com/RS2002/MusicPage','_blank')" class="text-xs px-4 py-1 bg-zinc-800 rounded-full hover:bg-zinc-700">📂 View GitHub Raw Data</button>
+            </header>
+
+            <!-- Home -->
+            <div id="home-page" class="p-8">
+                <h1 class="text-6xl font-black mb-3">Longino</h1>
+                <p class="text-xl text-zinc-400 max-w-lg">Independent Musician • Metal / Rock / Punck</p>
+                <div class="flex flex-wrap gap-4 mb-8">
+                    <button onclick="showPage('projects')" class="px-8 py-3 bg-violet-600 rounded-2xl font-semibold flex items-center gap-2 hover:bg-violet-700">
+                        Browse All Projects & Albums <i class="fas fa-arrow-right"></i>
+                    </button>
+                    <a href="https://zijianzhao.netlify.app/" target="_blank" class="px-8 py-3 bg-zinc-700 rounded-2xl font-medium flex items-center gap-2 hover:bg-zinc-600">
+                        <i class="fas fa-graduation-cap"></i> Academic Profile
+                    </a>
+                </div>
+
+                <div class="grid grid-cols-3 gap-6 mt-12">
+                    <div onclick="showProject('NEWS')" class="cursor-pointer bg-zinc-800 rounded-3xl overflow-hidden hover:ring-2 hover:ring-violet-500">
+                        <img src="https://raw.githubusercontent.com/RS2002/MusicPage/main/data/NEWS/cover.png" class="w-full h-52 object-cover clickable-cover">
+                        <div class="p-5"><h3 class="font-bold text-xl">📰 NEWS • Eternal Anger (Rock)</h3></div>
+                    </div>
+                    <div onclick="showProject('Personal Project')" class="cursor-pointer bg-zinc-800 rounded-3xl overflow-hidden hover:ring-2 hover:ring-violet-500">
+                        <img src="https://raw.githubusercontent.com/RS2002/MusicPage/main/data/Personal%20Project/cover.png" class="w-full h-52 object-cover clickable-cover">
+                        <div class="p-5"><h3 class="font-bold text-xl">🎸 Personal Project • Angel + NEWS (Rock/Metal)</h3></div>
+                    </div>
+                    <div onclick="showProject('Tokamak Disruption')" class="cursor-pointer bg-zinc-800 rounded-3xl overflow-hidden hover:ring-2 hover:ring-violet-500">
+                        <img src="https://raw.githubusercontent.com/RS2002/MusicPage/main/data/Tokamak%20Disruption/cover.jpg" class="w-full h-52 object-cover clickable-cover">
+                        <div class="p-5"><h3 class="font-bold text-xl">🤖 Tokamak Disruption • The Heart of Machine (Metal)</h3></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Projects Page -->
+            <div id="projects-page" class="p-8 hidden">
+                <button onclick="showPage('home')" class="mb-6 flex items-center gap-2 text-violet-400"><i class="fas fa-chevron-left"></i> Back to Bio</button>
+                <h2 class="text-4xl font-bold">All Projects • Click to enter</h2>
+                <div class="grid grid-cols-3 gap-6 mt-6">
+                    <button onclick="showProject('NEWS')" class="bg-zinc-800 p-8 rounded-3xl text-left hover:bg-zinc-700">📰 NEWS<br><span class="text-sm text-zinc-400">Eternal Anger — 9 tracks</span></button>
+                    <button onclick="showProject('Personal Project')" class="bg-zinc-800 p-8 rounded-3xl text-left hover:bg-zinc-700">🎸 Personal Project<br><span class="text-sm text-zinc-400">Angel + NEWS — 3 tracks</span></button>
+                    <button onclick="showProject('Tokamak Disruption')" class="bg-zinc-800 p-8 rounded-3xl text-left hover:bg-zinc-700">🤖 Tokamak Disruption<br><span class="text-sm text-zinc-400">The Heart of Machine — 6 tracks</span></button>
+                </div>
+            </div>
+
+            <!-- Project View -->
+            <div id="project-view" class="hidden p-8">
+                <button onclick="showPage('projects')" class="flex items-center gap-2 text-violet-400"><i class="fas fa-arrow-left"></i> All Projects</button>
+                <div class="flex gap-6 mt-6">
+                    <img id="proj-logo" class="w-32 h-32 rounded-3xl object-cover shadow-2xl clickable-cover" onclick="showAlbumsFromProject()" src="">
+                    <div>
+                        <h2 id="proj-title" class="text-5xl font-bold"></h2>
+                        <p id="proj-desc" class="text-zinc-400"></p>
+                        <button onclick="showAlbumsFromProject()" class="mt-4 px-5 py-2 bg-emerald-600 rounded-xl">View Albums ↓</button>
+                    </div>
+                </div>
+                <div id="albums-container" class="grid grid-cols-2 gap-6 mt-8"></div>
+            </div>
+
+            <!-- Album View -->
+            <div id="album-view" class="hidden p-8">
+                <button onclick="backToProject()" class="flex items-center gap-2 text-violet-400">← Back to Project</button>
+                <div class="flex gap-8 mt-4">
+                    <div>
+                        <h2 id="album-title" class="text-3xl font-semibold"></h2>
+                        <img id="album-cover-big" class="w-64 mt-4 rounded-2xl shadow-2xl clickable-cover" onclick="playFirstSongIfAvailable()" src="">
+                        <p class="text-zinc-400 text-sm mt-2">Click cover to play first available song</p>
+                    </div>
+                    <div class="flex-1">
+                        <div id="song-list" class="space-y-3"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Player (bottom bar) -->
+            <div id="player" class="hidden fixed inset-x-0 bottom-0 bg-zinc-900 border-t border-zinc-700 p-4 z-50">
+                <div class="max-w-4xl mx-auto">
+                    <div class="flex items-center gap-4">
+                        <img id="player-cover" class="w-16 h-16 rounded-xl" src="">
+                        <div class="flex-1">
+                            <div class="flex justify-between text-sm">
+                                <span id="now-title" class="font-medium"></span>
+                                <span id="time-display" class="font-mono">0:00 / 0:00</span>
+                            </div>
+                            <input type="range" id="seek-bar" min="0" max="100" value="0" class="w-full accent-violet-500">
+                            <audio id="main-audio" class="hidden"></audio>
+                            <div class="flex justify-between mt-2">
+                                <button onclick="prevTrack()" class="text-2xl"><i class="fas fa-step-backward"></i></button>
+                                <button onclick="togglePlayback()" id="play-pause-btn" class="text-4xl px-6">▶</button>
+                                <button onclick="nextTrack()" class="text-2xl"><i class="fas fa-step-forward"></i></button>
+                                <button onclick="closePlayer()" class="text-zinc-400">✕ Close</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mt-3 bg-zinc-800 rounded-xl p-4">
+                        <div id="lyrics-box" class="lyrics text-sm whitespace-pre-wrap"></div>
+                        <div id="no-audio-notice" class="hidden text-amber-400 text-center font-medium">🎵 Audio file will be uploaded soon<br><span class="text-xs">Only lyrics available right now</span></div>
+                    </div>
+                </div>
+            </div>
+
+            <footer class="text-center py-6 text-zinc-500 text-xs">
+                Updated: Click project/album covers to enter • Removed random play • All real files from repo
+            </footer>
+        </div>
+    </div>
+
+    <script>
+        // ==================== DATA (基于你的仓库实际文件) ====================
+        const musicData = {
+            "NEWS": {
+                logo: "https://raw.githubusercontent.com/RS2002/MusicPage/main/data/NEWS/cover.png",
+                desc: "Alternative Rock / Punck",
+                albums: {
+                    "Eternal Anger": {
+                        cover: "https://raw.githubusercontent.com/RS2002/MusicPage/main/data/NEWS/Eternal%20Anger/cover.png",
+                        songs: [
+                            {title: "穿制服的疯狗", audio: "https://raw.githubusercontent.com/RS2002/MusicPage/main/data/NEWS/Eternal%20Anger/%E7%A9%BF%E5%88%B6%E6%9C%8D%E7%9A%84%E7%96%AF%E7%8B%97.wav", lyricsURL: "https://raw.githubusercontent.com/RS2002/MusicPage/main/data/NEWS/Eternal%20Anger/%E7%A9%BF%E5%88%B6%E6%9C%8D%E7%9A%84%E7%96%AF%E7%8B%97.txt"},
+                            {title: "如果明天就要死了", audio: "https://raw.githubusercontent.com/RS2002/MusicPage/main/data/NEWS/Eternal%20Anger/%E5%A6%82%E6%9E%9C%E6%98%8E%E5%A4%A9%E5%B0%B1%E8%A6%81%E6%AD%BB%E4%BA%86.mp3", lyricsURL: "https://raw.githubusercontent.com/RS2002/MusicPage/main/data/NEWS/Eternal%20Anger/%E5%A6%82%E6%9E%9C%E6%98%8E%E5%A4%A9%E5%B0%B1%E8%A6%81%E6%AD%BB%E4%BA%86.txt"},
+                            {title: "地上世界", audio: "https://raw.githubusercontent.com/RS2002/MusicPage/main/data/NEWS/Eternal%20Anger/%E5%9C%B0%E4%B8%8A%E4%B8%96%E7%95%8C.wav", lyricsURL: "https://raw.githubusercontent.com/RS2002/MusicPage/main/data/NEWS/Eternal%20Anger/%E5%9C%B0%E4%B8%8A%E4%B8%96%E7%95%8C.txt"},
+                            {title: "鱿鱼游戏", audio: "https://raw.githubusercontent.com/RS2002/MusicPage/main/data/NEWS/Eternal%20Anger/%E9%B1%BF%E9%B1%BC%E6%B8%B8%E6%88%8F.mp3", lyricsURL: "https://raw.githubusercontent.com/RS2002/MusicPage/main/data/NEWS/Eternal%20Anger/%E9%B1%BF%E9%B1%BC%E6%B8%B8%E6%88%8F.txt"},
+                            {title: "Animal", audio: "https://raw.githubusercontent.com/RS2002/MusicPage/main/data/NEWS/Eternal%20Anger/Animal.wav", lyricsURL: "https://raw.githubusercontent.com/RS2002/MusicPage/main/data/NEWS/Eternal%20Anger/Animal.txt"},
+                            {title: "xxleaders", audio: "https://raw.githubusercontent.com/RS2002/MusicPage/main/data/NEWS/Eternal%20Anger/xxleaders.wav", lyricsURL: "https://raw.githubusercontent.com/RS2002/MusicPage/main/data/NEWS/Eternal%20Anger/xxleaders.txt"},
+                            {title: "Eternal Anger", audio: "https://raw.githubusercontent.com/RS2002/MusicPage/main/data/NEWS/Eternal%20Anger/Eternal%20Anger.wav", lyricsURL: "https://raw.githubusercontent.com/RS2002/MusicPage/main/data/NEWS/Eternal%20Anger/Eternal%20Anger.txt"},
+                            {title: "晚安", audio: "https://raw.githubusercontent.com/RS2002/MusicPage/main/data/NEWS/Eternal%20Anger/%E6%99%9A%E5%AE%89.wav", lyricsURL: "https://raw.githubusercontent.com/RS2002/MusicPage/main/data/NEWS/Eternal%20Anger/%E6%99%9A%E5%AE%89.txt"},
+                            {title: "outro", audio: "https://raw.githubusercontent.com/RS2002/MusicPage/main/data/NEWS/Eternal%20Anger/outro.wav", lyricsURL: "https://raw.githubusercontent.com/RS2002/MusicPage/main/data/NEWS/Eternal%20Anger/outro.txt"}
+                        ]
+                    }
+                }
+            },
+            "Personal Project": {
+                logo: "https://raw.githubusercontent.com/RS2002/MusicPage/main/data/Personal%20Project/cover.png",
+                desc: "Alternative Rock / Metal",
+                albums: {
+                    "Angel": {
+                        cover: "https://raw.githubusercontent.com/RS2002/MusicPage/main/data/Personal%20Project/Angel/cover.png",
+                        songs: [
+                            {title: "intro", audio: "https://raw.githubusercontent.com/RS2002/MusicPage/main/data/Personal%20Project/Angel/intro.wav", lyricsURL: "https://raw.githubusercontent.com/RS2002/MusicPage/main/data/Personal%20Project/Angel/intro.txt"},
+                            {title: "Promise", audio: "https://raw.githubusercontent.com/RS2002/MusicPage/main/data/Personal%20Project/Angel/Promise.wav", lyricsURL: "https://raw.githubusercontent.com/RS2002/MusicPage/main/data/Personal%20Project/Angel/Promise.txt"}
+                        ]
+                    },
+                    "NEWS": {
+                        cover: "https://raw.githubusercontent.com/RS2002/MusicPage/main/data/Personal%20Project/NEWS/cover.png",
+                        songs: [
+                            {title: "像你一样", audio: "https://raw.githubusercontent.com/RS2002/MusicPage/main/data/Personal%20Project/NEWS/%E5%83%8F%E4%BD%A0%E4%B8%80%E6%A0%B7.wav", lyricsURL: "https://raw.githubusercontent.com/RS2002/MusicPage/main/data/Personal%20Project/NEWS/%E5%83%8F%E4%BD%A0%E4%B8%80%E6%A0%B7.txt"}
+                        ]
+                    }
+                }
+            },
+            "Tokamak Disruption": {
+                logo: "https://raw.githubusercontent.com/RS2002/MusicPage/main/data/Tokamak%20Disruption/cover.jpg",
+                desc: "Alternative Metal / Metalcore / Melodic Death Metal",
+                albums: {
+                    "The Heart of Machine": {
+                        cover: "https://raw.githubusercontent.com/RS2002/MusicPage/main/data/Tokamak%20Disruption/The%20Heart%20of%20Machine/cover.png",
+                        songs: [
+                            {title: "The Heart of Machine", audio: null, lyricsURL: "https://raw.githubusercontent.com/RS2002/MusicPage/main/data/Tokamak%20Disruption/The%20Heart%20of%20Machine/The Heart of Machine.txt"},
+                            {title: "LLM", audio: "https://raw.githubusercontent.com/RS2002/MusicPage/main/data/Tokamak%20Disruption/The%20Heart%20of%20Machine/LLM.mp3", lyricsURL: "https://raw.githubusercontent.com/RS2002/MusicPage/main/data/Tokamak%20Disruption/The%20Heart%20of%20Machine/LLM.txt"},
+                            {title: "Domain Alignment", audio: null, lyricsURL: "https://raw.githubusercontent.com/RS2002/MusicPage/main/data/Tokamak%20Disruption/The%20Heart%20of%20Machine/Domain Alignment.txt"},
+                            {title: "Machine Unlearning", audio: "https://raw.githubusercontent.com/RS2002/MusicPage/main/data/Tokamak%20Disruption/The%20Heart%20of%20Machine/Machine Unlearning.mp3", lyricsURL: "https://raw.githubusercontent.com/RS2002/MusicPage/main/data/Tokamak%20Disruption/The%20Heart%20of%20Machine/Machine Unlearning.txt"},
+                            {title: "Siamese", audio: "https://raw.githubusercontent.com/RS2002/MusicPage/main/data/Tokamak%20Disruption/The%20Heart%20of%20Machine/Siamese.mp3", lyricsURL: "https://raw.githubusercontent.com/RS2002/MusicPage/main/data/Tokamak%20Disruption/The%20Heart%20of%20Machine/Siamese.txt"},
+                            {title: "Checkpoint", audio: null, lyricsURL: "https://raw.githubusercontent.com/RS2002/MusicPage/main/data/Tokamak%20Disruption/The%20Heart%20of%20Machine/Checkpoint.txt"}
+                        ]
+                    }
+                }
+            }
+        };
+
+        let currentProj = "", currentAlbumName = "", currentSongList = [], currentIndex = 0;
+        let audioEl = null;
+
+        function showPage(page) {
+            document.querySelectorAll('#home-page,#projects-page,#project-view,#album-view').forEach(d=>d.classList.add('hidden'));
+            document.getElementById(page+'-page').classList.remove('hidden');
+        }
+
+        function showProject(proj) {
+            currentProj = proj;
+            document.getElementById('project-view').classList.remove('hidden');
+            document.getElementById('home-page').classList.add('hidden');
+            document.getElementById('projects-page').classList.add('hidden');
+
+            document.getElementById('proj-title').textContent = proj;
+            document.getElementById('proj-logo').src = musicData[proj].logo;
+            document.getElementById('proj-desc').textContent = musicData[proj].desc;
+
+            const container = document.getElementById('albums-container');
+            container.innerHTML = '';
+            Object.keys(musicData[proj].albums).forEach(alb => {
+                const div = document.createElement('div');
+                div.className = "bg-zinc-800 p-4 rounded-2xl cursor-pointer hover:ring-2 hover:ring-emerald-400";
+                div.innerHTML = `
+                    <img src="${musicData[proj].albums[alb].cover}" class="rounded-xl w-full h-48 object-cover clickable-cover" onclick="openAlbum('${alb}'); event.stopPropagation()">
+                    <h4 class="mt-3">${alb}</h4>
+                    <button onclick="openAlbum('${alb}'); event.stopPropagation()" class="mt-2 text-xs bg-emerald-600 px-4 py-1 rounded">Open Album →</button>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        function openAlbum(alb) {
+            currentAlbumName = alb;
+            document.getElementById('project-view').classList.add('hidden');
+            const av = document.getElementById('album-view');
+            av.classList.remove('hidden');
+            document.getElementById('album-title').textContent = currentProj + " — " + alb;
+            document.getElementById('album-cover-big').src = musicData[currentProj].albums[alb].cover;
+
+            currentSongList = musicData[currentProj].albums[alb].songs;
+            const listEl = document.getElementById('song-list');
+            listEl.innerHTML = '';
+            currentSongList.forEach((s,i) => {
+                const row = document.createElement('div');
+                row.className = "song-card bg-zinc-800 flex justify-between px-5 py-3 rounded-2xl items-center";
+                row.innerHTML = `
+                    <div class="flex items-center gap-3">
+                        <span class="font-medium">${s.title}</span>
+                        ${s.audio ? '<i class="fas fa-music text-emerald-400"></i>' : '<i class="fas fa-file-lines text-amber-400"></i>'}
+                    </div>
+                    <button onclick="startPlaying(${i}); event.stopPropagation()" class="px-6 py-1 bg-violet-600 text-xs rounded-full">▶ Play + Lyrics</button>
+                `;
+                listEl.appendChild(row);
+            });
+        }
+
+        function backToProject() {
+            document.getElementById('album-view').classList.add('hidden');
+            document.getElementById('project-view').classList.remove('hidden');
+        }
+
+        function showAlbumsFromProject() {
+            // 在 project-view 中点击 logo 时，模拟打开专辑列表（已存在按钮，可直接用）
+            // 如果你想直接跳到第一个专辑，可以在这里添加逻辑
+            if (Object.keys(musicData[currentProj].albums).length > 0) {
+                const firstAlbum = Object.keys(musicData[currentProj].albums)[0];
+                openAlbum(firstAlbum);
+            }
+        }
+
+        function playFirstSongIfAvailable() {
+            if (currentSongList.length > 0) {
+                const firstWithAudio = currentSongList.findIndex(s => s.audio);
+                if (firstWithAudio !== -1) {
+                    startPlaying(firstWithAudio);
+                } else if (currentSongList.length > 0) {
+                    startPlaying(0);  // 即使只有歌词也打开播放器显示提示
+                }
+            }
+        }
+
+        function startPlaying(idx) {
+            currentIndex = idx;
+            const song = currentSongList[idx];
+            document.getElementById('player').classList.remove('hidden');
+            document.getElementById('now-title').textContent = song.title;
+            document.getElementById('player-cover').src = musicData[currentProj].albums[currentAlbumName].cover;
+
+            audioEl = document.getElementById('main-audio');
+            if (song.audio) {
+                audioEl.src = song.audio;
+                document.getElementById('no-audio-notice').classList.add('hidden');
+                audioEl.play().catch(e => console.log("Play error:", e));
+                document.getElementById('play-pause-btn').innerHTML = '❚❚';
+            } else {
+                audioEl.src = '';
+                document.getElementById('no-audio-notice').classList.remove('hidden');
+                document.getElementById('play-pause-btn').innerHTML = '📜';
+            }
+
+            // 加载歌词
+            if (song.lyricsURL) {
+                fetch(song.lyricsURL)
+                    .then(r => r.text())
+                    .then(txt => {
+                        document.getElementById('lyrics-box').textContent = txt.trim() || "Lyrics loaded.";
+                    })
+                    .catch(() => {
+                        document.getElementById('lyrics-box').textContent = "Could not load lyrics file.";
+                    });
+            } else {
+                document.getElementById('lyrics-box').textContent = "";
+            }
+
+            setupAudioListeners();
+        }
+
+        function setupAudioListeners() {
+            if (!audioEl) return;
+            audioEl.ontimeupdate = () => {
+                if (audioEl.duration) {
+                    const perc = (audioEl.currentTime / audioEl.duration) * 100;
+                    document.getElementById('seek-bar').value = perc;
+                    document.getElementById('time-display').textContent = 
+                        `${formatTime(audioEl.currentTime)} / ${formatTime(audioEl.duration)}`;
+                }
+            };
+            audioEl.onended = () => { nextTrack(); };
+            document.getElementById('seek-bar').oninput = (e) => {
+                if (audioEl.duration) {
+                    audioEl.currentTime = (e.target.value / 100) * audioEl.duration;
+                }
+            };
+        }
+
+        function formatTime(sec) {
+            const m = Math.floor(sec / 60);
+            const s = Math.floor(sec % 60);
+            return `${m}:${s < 10 ? '0' : ''}${s}`;
+        }
+
+        function togglePlayback() {
+            if (!audioEl || !audioEl.src) return;
+            if (audioEl.paused) {
+                audioEl.play();
+                document.getElementById('play-pause-btn').innerHTML = '❚❚';
+            } else {
+                audioEl.pause();
+                document.getElementById('play-pause-btn').innerHTML = '▶';
+            }
+        }
+
+        function prevTrack() {
+            if (currentIndex > 0) startPlaying(currentIndex - 1);
+        }
+
+        function nextTrack() {
+            if (currentIndex < currentSongList.length - 1) startPlaying(currentIndex + 1);
+        }
+
+        function closePlayer() {
+            if (audioEl) audioEl.pause();
+            document.getElementById('player').classList.add('hidden');
+        }
+
+        // Initial load
+        showPage('home');
+    </script>
+</body>
+</html>
