@@ -8,18 +8,67 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <style>
         body { font-family: system-ui, sans-serif; }
+
+        /* ==================== BACKGROUND ==================== */
+        /* Photo layer: fixed to the viewport, slightly blurred and desaturated so
+           the busy red stage lighting never fights with the text on top of it.
+           Inset is negative so the blur has no transparent edges. */
+        #bg-layer {
+            position: fixed;
+            inset: -2%;
+            z-index: 0;
+            background-size: cover;
+            background-position: center 38%;
+            background-repeat: no-repeat;
+            filter: saturate(0.82) blur(2px);
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.8s ease;
+        }
+        #bg-layer.bg-ready { opacity: 1; }
+
+        /* Scrim: ~80% dark in the middle, deepening to ~91% at the edges (vignette). */
+        #bg-scrim {
+            position: fixed;
+            inset: 0;
+            z-index: 1;
+            pointer-events: none;
+            background:
+                radial-gradient(ellipse 110% 85% at 50% 40%, rgba(9,9,11,0) 30%, rgba(9,9,11,0.55) 100%),
+                linear-gradient(to bottom, rgba(9,9,11,0.82) 0%, rgba(9,9,11,0.76) 45%, rgba(9,9,11,0.88) 100%);
+        }
+        /* Mobile: background-attachment/fixed layers are jumpy on iOS, keep it simple. */
+        @media (max-width: 767px) {
+            #bg-layer { background-attachment: scroll; }
+        }
+
+        .hero-text { text-shadow: 0 2px 24px rgba(0,0,0,0.85); }
+
         .song-card { transition: all 0.3s; }
-        .song-card:hover { transform: translateX(8px); background-color: #1f2937; }
-        .lyrics { max-height: 320px; overflow-y: auto; line-height: 1.6; font-family: 'Courier New', monospace; }
+        .song-card:hover { transform: translateX(8px); background-color: rgba(31,41,55,0.88); }
+        .lyrics { overflow-y: auto; line-height: 1.6; font-family: 'Courier New', monospace; }
         .nav-active { border-b-4 border-violet-500 font-bold; }
         .clickable-cover { cursor: pointer; transition: transform 0.2s; }
         .clickable-cover:hover { transform: scale(1.04); }
+        /* Resize handle for the lyrics panel */
+        #resize-handle { cursor: ns-resize; touch-action: none; }
+        #resize-handle .grip { transition: background-color 0.15s, width 0.15s; }
+        #resize-handle:hover .grip, #resize-handle.dragging .grip { background-color: #8b5cf6; width: 6rem; }
+        body.resizing-player { user-select: none; cursor: ns-resize; }
+        /* Thin scrollbar inside the lyrics box */
+        .lyrics::-webkit-scrollbar { width: 8px; }
+        .lyrics::-webkit-scrollbar-thumb { background: #52525b; border-radius: 4px; }
+        .lyrics::-webkit-scrollbar-track { background: transparent; }
     </style>
 </head>
 <body class="bg-zinc-950 text-zinc-100">
-    <div class="min-h-screen flex">
+    <!-- Fixed background photo + readability scrim -->
+    <div id="bg-layer" aria-hidden="true"></div>
+    <div id="bg-scrim" aria-hidden="true"></div>
+
+    <div class="min-h-screen flex relative z-10">
         <!-- Sidebar -->
-        <div class="w-72 bg-zinc-900 border-r border-zinc-700 p-6 flex flex-col">
+        <div class="w-72 bg-zinc-900/70 backdrop-blur-xl border-r border-white/10 p-6 flex flex-col">
             <div class="flex items-center gap-3 mb-8">
                 <img src="https://raw.githubusercontent.com/RS2002/MusicPage/main/data/cover.jpg" class="w-14 h-14 rounded-2xl shadow" alt="RS2002">
                 <div>
@@ -31,7 +80,7 @@
                 <button onclick="showPage('home')" class="nav-active w-full text-left px-4 py-3 rounded-xl flex items-center gap-3" id="nav-home">
                     <i class="fas fa-house"></i> Home / Bio
                 </button>
-                <button onclick="showPage('projects')" class="w-full text-left px-4 py-3 rounded-xl flex items-center gap-3 hover:bg-zinc-800" id="nav-projects">
+                <button onclick="showPage('projects')" class="w-full text-left px-4 py-3 rounded-xl flex items-center gap-3 hover:bg-white/10" id="nav-projects">
                     <i class="fas fa-folder-tree"></i> All Projects (3)
                 </button>
             </nav>
@@ -43,20 +92,20 @@
 
         <!-- Main -->
         <div class="flex-1">
-            <header class="border-b border-zinc-700 bg-zinc-900 px-8 py-4 flex justify-between items-center">
+            <header class="border-b border-white/10 bg-zinc-900/60 backdrop-blur-xl px-8 py-4 flex justify-between items-center">
                 <div class="flex gap-6 text-sm font-medium">
                     <button onclick="showPage('home')" class="hover:text-white">🏠 Bio</button>
                     <button onclick="showProject('NEWS')" class="hover:text-white">📰 NEWS</button>
                     <button onclick="showProject('Personal Project')" class="hover:text-white">🎸 Personal Project</button>
                     <button onclick="showProject('Tokamak Disruption')" class="hover:text-white">🤖 Tokamak Disruption</button>
                 </div>
-                <button onclick="window.open('https://github.com/RS2002/MusicPage','_blank')" class="text-xs px-4 py-1 bg-zinc-800 rounded-full hover:bg-zinc-700">📂 View GitHub Raw Data</button>
+                <button onclick="window.open('https://github.com/RS2002/MusicPage','_blank')" class="text-xs px-4 py-1 bg-zinc-800/70 backdrop-blur rounded-full hover:bg-zinc-700/80">📂 View GitHub Raw Data</button>
             </header>
 
             <!-- Home -->
             <div id="home-page" class="p-8">
-                <h1 class="text-6xl font-black mb-3">Longino</h1>
-                <p class="text-xl text-zinc-400 max-w-lg">Independent Musician • Metal / Rock / Punck</p>
+                <h1 class="text-6xl font-black mb-3 hero-text">Longino</h1>
+                <p class="text-xl text-zinc-300 max-w-lg hero-text">Independent Musician • Metal / Rock / Punck</p>
                 <div class="flex flex-wrap gap-4 mb-8">
                     <button onclick="showPage('projects')" class="px-8 py-3 bg-violet-600 rounded-2xl font-semibold flex items-center gap-2 hover:bg-violet-700">
                         Browse All Projects & Albums <i class="fas fa-arrow-right"></i>
@@ -67,15 +116,15 @@
                 </div>
 
                 <div class="grid grid-cols-3 gap-6 mt-12">
-                    <div onclick="showProject('NEWS')" class="cursor-pointer bg-zinc-800 rounded-3xl overflow-hidden hover:ring-2 hover:ring-violet-500">
+                    <div onclick="showProject('NEWS')" class="cursor-pointer bg-zinc-800/60 backdrop-blur-md border border-white/10 rounded-3xl overflow-hidden hover:ring-2 hover:ring-violet-500">
                         <img src="https://raw.githubusercontent.com/RS2002/MusicPage/main/data/NEWS/cover.png" class="w-full h-52 object-cover clickable-cover">
                         <div class="p-5"><h3 class="font-bold text-xl">📰 NEWS • Eternal Anger (Rock)</h3></div>
                     </div>
-                    <div onclick="showProject('Personal Project')" class="cursor-pointer bg-zinc-800 rounded-3xl overflow-hidden hover:ring-2 hover:ring-violet-500">
+                    <div onclick="showProject('Personal Project')" class="cursor-pointer bg-zinc-800/60 backdrop-blur-md border border-white/10 rounded-3xl overflow-hidden hover:ring-2 hover:ring-violet-500">
                         <img src="https://raw.githubusercontent.com/RS2002/MusicPage/main/data/Personal%20Project/cover.png" class="w-full h-52 object-cover clickable-cover">
                         <div class="p-5"><h3 class="font-bold text-xl">🎸 Personal Project • Angel + NEWS (Rock/Metal)</h3></div>
                     </div>
-                    <div onclick="showProject('Tokamak Disruption')" class="cursor-pointer bg-zinc-800 rounded-3xl overflow-hidden hover:ring-2 hover:ring-violet-500">
+                    <div onclick="showProject('Tokamak Disruption')" class="cursor-pointer bg-zinc-800/60 backdrop-blur-md border border-white/10 rounded-3xl overflow-hidden hover:ring-2 hover:ring-violet-500">
                         <img src="https://raw.githubusercontent.com/RS2002/MusicPage/main/data/Tokamak%20Disruption/cover.jpg" class="w-full h-52 object-cover clickable-cover">
                         <div class="p-5"><h3 class="font-bold text-xl">🤖 Tokamak Disruption • The Heart of Machine (Metal)</h3></div>
                     </div>
@@ -85,11 +134,11 @@
             <!-- Projects Page -->
             <div id="projects-page" class="p-8 hidden">
                 <button onclick="showPage('home')" class="mb-6 flex items-center gap-2 text-violet-400"><i class="fas fa-chevron-left"></i> Back to Bio</button>
-                <h2 class="text-4xl font-bold">All Projects • Click to enter</h2>
+                <h2 class="text-4xl font-bold hero-text">All Projects • Click to enter</h2>
                 <div class="grid grid-cols-3 gap-6 mt-6">
-                    <button onclick="showProject('NEWS')" class="bg-zinc-800 p-8 rounded-3xl text-left hover:bg-zinc-700">📰 NEWS<br><span class="text-sm text-zinc-400">Eternal Anger — 9 tracks</span></button>
-                    <button onclick="showProject('Personal Project')" class="bg-zinc-800 p-8 rounded-3xl text-left hover:bg-zinc-700">🎸 Personal Project<br><span class="text-sm text-zinc-400">Angel + NEWS — 3 tracks</span></button>
-                    <button onclick="showProject('Tokamak Disruption')" class="bg-zinc-800 p-8 rounded-3xl text-left hover:bg-zinc-700">🤖 Tokamak Disruption<br><span class="text-sm text-zinc-400">The Heart of Machine — 6 tracks</span></button>
+                    <button onclick="showProject('NEWS')" class="bg-zinc-800/60 backdrop-blur-md border border-white/10 p-8 rounded-3xl text-left hover:bg-zinc-700/70">📰 NEWS<br><span class="text-sm text-zinc-400">Eternal Anger — 9 tracks</span></button>
+                    <button onclick="showProject('Personal Project')" class="bg-zinc-800/60 backdrop-blur-md border border-white/10 p-8 rounded-3xl text-left hover:bg-zinc-700/70">🎸 Personal Project<br><span class="text-sm text-zinc-400">Angel + NEWS — 3 tracks</span></button>
+                    <button onclick="showProject('Tokamak Disruption')" class="bg-zinc-800/60 backdrop-blur-md border border-white/10 p-8 rounded-3xl text-left hover:bg-zinc-700/70">🤖 Tokamak Disruption<br><span class="text-sm text-zinc-400">The Heart of Machine — 6 tracks</span></button>
                 </div>
             </div>
 
@@ -99,8 +148,8 @@
                 <div class="flex gap-6 mt-6">
                     <img id="proj-logo" class="w-32 h-32 rounded-3xl object-cover shadow-2xl clickable-cover" onclick="showAlbumsFromProject()" src="">
                     <div>
-                        <h2 id="proj-title" class="text-5xl font-bold"></h2>
-                        <p id="proj-desc" class="text-zinc-400"></p>
+                        <h2 id="proj-title" class="text-5xl font-bold hero-text"></h2>
+                        <p id="proj-desc" class="text-zinc-300 hero-text"></p>
                         <button onclick="showAlbumsFromProject()" class="mt-4 px-5 py-2 bg-emerald-600 rounded-xl">View Albums ↓</button>
                     </div>
                 </div>
@@ -112,9 +161,9 @@
                 <button onclick="backToProject()" class="flex items-center gap-2 text-violet-400">← Back to Project</button>
                 <div class="flex gap-8 mt-4">
                     <div>
-                        <h2 id="album-title" class="text-3xl font-semibold"></h2>
+                        <h2 id="album-title" class="text-3xl font-semibold hero-text"></h2>
                         <img id="album-cover-big" class="w-64 mt-4 rounded-2xl shadow-2xl clickable-cover" onclick="playFirstSongIfAvailable()" src="">
-                        <p class="text-zinc-400 text-sm mt-2">Click cover to play first available song</p>
+                        <p class="text-zinc-300 text-sm mt-2 hero-text">Click cover to play first available song</p>
                     </div>
                     <div class="flex-1">
                         <div id="song-list" class="space-y-3"></div>
@@ -123,28 +172,41 @@
             </div>
 
             <!-- Player (bottom bar) -->
-            <div id="player" class="hidden fixed inset-x-0 bottom-0 bg-zinc-900 border-t border-zinc-700 p-4 z-50">
-                <div class="max-w-4xl mx-auto">
-                    <div class="flex items-center gap-4">
+            <div id="player" class="hidden fixed inset-x-0 bottom-0 bg-zinc-900/85 backdrop-blur-2xl border-t border-white/10 z-50">
+
+                <!-- Drag handle: only visible when the lyrics panel is expanded -->
+                <div id="resize-handle" class="hidden w-full h-4 items-center justify-center" title="拖动调整歌词区高度（双击复位）">
+                    <div class="grip w-16 h-1 rounded-full bg-zinc-600"></div>
+                </div>
+
+                <div class="max-w-4xl mx-auto px-4 pb-4 pt-2">
+
+                    <!-- Lyrics panel (sits above the controls, so the buttons never jump) -->
+                    <div id="lyrics-panel" class="hidden flex-col mb-3 bg-zinc-950/70 backdrop-blur-md border border-white/10 rounded-xl p-4 overflow-hidden" style="height: 320px;">
+                        <div id="no-audio-notice" class="hidden text-amber-400 text-center font-medium mb-2 shrink-0">🎵 Audio file will be uploaded soon<br><span class="text-xs">Only lyrics available right now</span></div>
+                        <div id="lyrics-box" class="lyrics text-sm whitespace-pre-wrap flex-1 min-h-0"></div>
+                    </div>
+
+                    <div id="player-controls" class="flex items-center gap-4">
                         <img id="player-cover" class="w-16 h-16 rounded-xl" src="">
                         <div class="flex-1">
                             <div class="flex justify-between text-sm">
-                                <span id="now-title" class="font-medium"></span>
-                                <span id="time-display" class="font-mono">0:00 / 0:00</span>
+                                <span class="flex items-center gap-2 min-w-0">
+                                    <span id="now-title" class="font-medium truncate"></span>
+                                    <span id="no-audio-badge" class="hidden shrink-0 text-amber-400 text-xs border border-amber-500/40 rounded-full px-2 py-0.5">📜 lyrics only</span>
+                                </span>
+                                <span id="time-display" class="font-mono shrink-0">0:00 / 0:00</span>
                             </div>
                             <input type="range" id="seek-bar" min="0" max="100" value="0" class="w-full accent-violet-500">
                             <audio id="main-audio" class="hidden"></audio>
-                            <div class="flex justify-between mt-2">
-                                <button onclick="prevTrack()" class="text-2xl"><i class="fas fa-step-backward"></i></button>
+                            <div class="flex justify-between items-center mt-2">
+                                <button onclick="prevTrack()" class="text-2xl" title="上一首"><i class="fas fa-step-backward"></i></button>
                                 <button onclick="togglePlayback()" id="play-pause-btn" class="text-4xl px-6">▶</button>
-                                <button onclick="nextTrack()" class="text-2xl"><i class="fas fa-step-forward"></i></button>
-                                <button onclick="closePlayer()" class="text-zinc-400">✕ Close</button>
+                                <button onclick="nextTrack()" class="text-2xl" title="下一首"><i class="fas fa-step-forward"></i></button>
+                                <button onclick="togglePlayerSize()" id="toggle-lyrics-btn" class="text-sm px-4 py-1 rounded-full bg-white/10 hover:bg-white/20 flex items-center gap-2"></button>
+                                <button onclick="closePlayer()" class="text-zinc-400 hover:text-zinc-200">✕ Close</button>
                             </div>
                         </div>
-                    </div>
-                    <div class="mt-3 bg-zinc-800 rounded-xl p-4">
-                        <div id="lyrics-box" class="lyrics text-sm whitespace-pre-wrap"></div>
-                        <div id="no-audio-notice" class="hidden text-amber-400 text-center font-medium">🎵 Audio file will be uploaded soon<br><span class="text-xs">Only lyrics available right now</span></div>
                     </div>
                 </div>
             </div>
@@ -216,8 +278,143 @@
             }
         };
 
+        // ==================== BACKGROUND IMAGE ====================
+        // Prefer the local copy (fast, unaffected by the GFW); fall back to the
+        // GitHub raw URL; if neither loads, the plain dark background stays.
+        (function initBackground() {
+            const LOCAL  = 'data/background.jpg';
+            const REMOTE = 'https://raw.githubusercontent.com/RS2002/MusicPage/main/data/background.jpg';
+            const layer  = document.getElementById('bg-layer');
+
+            function apply(url) {
+                layer.style.backgroundImage = `url('${url}')`;
+                layer.classList.add('bg-ready');
+            }
+            function tryLoad(url, onFail) {
+                const probe = new Image();
+                probe.onload  = () => apply(url);
+                probe.onerror = onFail;
+                probe.src = url;
+            }
+            tryLoad(LOCAL, () => tryLoad(REMOTE, () => {
+                console.log('Background image unavailable — keeping the solid dark background.');
+            }));
+        })();
+
         let currentProj = "", currentAlbumName = "", currentSongList = [], currentIndex = 0;
         let audioEl = null;
+
+        // ==================== PLAYER SIZE / MINIMIZE STATE ====================
+        // Remembered for the current session only: switching tracks keeps the user's
+        // choice, reloading the page returns to the default (minimized).
+        let playerExpanded = false;          // false = minimized (player bar only)
+        let lyricsPanelHeight = 320;         // px, user-resizable
+        const DEFAULT_PANEL_HEIGHT = 320;
+        const MIN_PANEL_HEIGHT = 96;
+
+        function maxPanelHeight() {
+            const controls = document.getElementById('player-controls');
+            const controlsH = controls ? controls.offsetHeight : 120;
+            return Math.max(MIN_PANEL_HEIGHT, window.innerHeight - controlsH - 72);
+        }
+
+        function clampPanelHeight(h) {
+            return Math.min(Math.max(h, MIN_PANEL_HEIGHT), maxPanelHeight());
+        }
+
+        // Applies the current expanded/minimized state to the DOM.
+        function applyPlayerLayout() {
+            const panel  = document.getElementById('lyrics-panel');
+            const handle = document.getElementById('resize-handle');
+            const btn    = document.getElementById('toggle-lyrics-btn');
+
+            if (playerExpanded) {
+                panel.classList.remove('hidden');
+                panel.classList.add('flex');
+                handle.classList.remove('hidden');
+                handle.classList.add('flex');
+                lyricsPanelHeight = clampPanelHeight(lyricsPanelHeight);
+                panel.style.height = lyricsPanelHeight + 'px';
+                btn.innerHTML = '<i class="fas fa-chevron-down"></i> Hide Lyrics';
+                btn.title = 'Minimize — 收起歌词，只保留播放条';
+            } else {
+                panel.classList.add('hidden');
+                panel.classList.remove('flex');
+                handle.classList.add('hidden');
+                handle.classList.remove('flex');
+                btn.innerHTML = '<i class="fas fa-chevron-up"></i> Lyrics';
+                btn.title = 'Expand — 展开完整歌词';
+            }
+            updateBodySpacing();
+        }
+
+        function togglePlayerSize() {
+            playerExpanded = !playerExpanded;
+            applyPlayerLayout();
+        }
+
+        // Keeps page content from hiding underneath the fixed player.
+        function updateBodySpacing() {
+            const player = document.getElementById('player');
+            if (!player || player.classList.contains('hidden')) {
+                document.body.style.paddingBottom = '';
+                return;
+            }
+            document.body.style.paddingBottom = (player.offsetHeight + 16) + 'px';
+        }
+
+        // ---------- Drag-to-resize the lyrics panel ----------
+        (function initPanelResize() {
+            const handle = document.getElementById('resize-handle');
+            const panel  = document.getElementById('lyrics-panel');
+            let dragging = false, startY = 0, startHeight = 0;
+
+            const pointerY = (e) => (e.touches && e.touches.length) ? e.touches[0].clientY : e.clientY;
+
+            function onDown(e) {
+                dragging = true;
+                startY = pointerY(e);
+                startHeight = lyricsPanelHeight;
+                handle.classList.add('dragging');
+                document.body.classList.add('resizing-player');
+                e.preventDefault();
+            }
+
+            function onMove(e) {
+                if (!dragging) return;
+                // Dragging up (smaller clientY) grows the panel.
+                lyricsPanelHeight = clampPanelHeight(startHeight + (startY - pointerY(e)));
+                panel.style.height = lyricsPanelHeight + 'px';
+                updateBodySpacing();
+                e.preventDefault();
+            }
+
+            function onUp() {
+                if (!dragging) return;
+                dragging = false;
+                handle.classList.remove('dragging');
+                document.body.classList.remove('resizing-player');
+            }
+
+            handle.addEventListener('mousedown', onDown);
+            window.addEventListener('mousemove', onMove);
+            window.addEventListener('mouseup', onUp);
+
+            handle.addEventListener('touchstart', onDown, { passive: false });
+            window.addEventListener('touchmove', onMove, { passive: false });
+            window.addEventListener('touchend', onUp);
+            window.addEventListener('touchcancel', onUp);
+
+            // Double-click the handle to restore the default height.
+            handle.addEventListener('dblclick', () => {
+                lyricsPanelHeight = DEFAULT_PANEL_HEIGHT;
+                applyPlayerLayout();
+            });
+        })();
+
+        window.addEventListener('resize', () => {
+            if (!document.getElementById('player').classList.contains('hidden')) applyPlayerLayout();
+        });
 
         function showPage(page) {
             document.querySelectorAll('#home-page,#projects-page,#project-view,#album-view').forEach(d=>d.classList.add('hidden'));
@@ -238,7 +435,7 @@
             container.innerHTML = '';
             Object.keys(musicData[proj].albums).forEach(alb => {
                 const div = document.createElement('div');
-                div.className = "bg-zinc-800 p-4 rounded-2xl cursor-pointer hover:ring-2 hover:ring-emerald-400";
+                div.className = "bg-zinc-800/60 backdrop-blur-md border border-white/10 p-4 rounded-2xl cursor-pointer hover:ring-2 hover:ring-emerald-400";
                 div.innerHTML = `
                     <img src="${musicData[proj].albums[alb].cover}" class="rounded-xl w-full h-48 object-cover clickable-cover" onclick="openAlbum('${alb}'); event.stopPropagation()">
                     <h4 class="mt-3">${alb}</h4>
@@ -261,7 +458,7 @@
             listEl.innerHTML = '';
             currentSongList.forEach((s,i) => {
                 const row = document.createElement('div');
-                row.className = "song-card bg-zinc-800 flex justify-between px-5 py-3 rounded-2xl items-center";
+                row.className = "song-card bg-zinc-800/60 backdrop-blur-md border border-white/10 flex justify-between px-5 py-3 rounded-2xl items-center";
                 row.innerHTML = `
                     <div class="flex items-center gap-3">
                         <span class="font-medium">${s.title}</span>
@@ -309,28 +506,35 @@
             if (song.audio) {
                 audioEl.src = song.audio;
                 document.getElementById('no-audio-notice').classList.add('hidden');
+                document.getElementById('no-audio-badge').classList.add('hidden');
                 audioEl.play().catch(e => console.log("Play error:", e));
                 document.getElementById('play-pause-btn').innerHTML = '❚❚';
             } else {
                 audioEl.src = '';
                 document.getElementById('no-audio-notice').classList.remove('hidden');
+                document.getElementById('no-audio-badge').classList.remove('hidden');
                 document.getElementById('play-pause-btn').innerHTML = '📜';
             }
 
             // 加载歌词
             if (song.lyricsURL) {
+                const lyricsBox = document.getElementById('lyrics-box');
+                lyricsBox.textContent = "Loading lyrics…";
+                lyricsBox.scrollTop = 0;
                 fetch(song.lyricsURL)
                     .then(r => r.text())
                     .then(txt => {
-                        document.getElementById('lyrics-box').textContent = txt.trim() || "Lyrics loaded.";
+                        lyricsBox.textContent = txt.trim() || "Lyrics loaded.";
                     })
                     .catch(() => {
-                        document.getElementById('lyrics-box').textContent = "Could not load lyrics file.";
+                        lyricsBox.textContent = "Could not load lyrics file.";
                     });
             } else {
                 document.getElementById('lyrics-box').textContent = "";
             }
 
+            // Keep whatever expand/minimize state the user last chose this session.
+            applyPlayerLayout();
             setupAudioListeners();
         }
 
@@ -380,10 +584,12 @@
         function closePlayer() {
             if (audioEl) audioEl.pause();
             document.getElementById('player').classList.add('hidden');
+            updateBodySpacing();
         }
 
         // Initial load
         showPage('home');
+        applyPlayerLayout();   // player starts minimized by default
     </script>
 </body>
 </html>
